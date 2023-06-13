@@ -7,7 +7,7 @@
             
             <h2 style="text-align:center">User Bill</h2>
         
-            <a  class="btn btn-primary" href="{{ route('createBill') }}">Add Bill</a>
+            <a  class="btn btn-primary" href="{{ route('createBill') }}">Generate Bill</a>
             
         <div class="table-responsive">
 
