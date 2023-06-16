@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\UserBill;
+use App\Models\UnitSlab;
 use Exception;
 
 class CustomerController extends Controller
@@ -84,30 +85,28 @@ class CustomerController extends Controller
             'unit' => 'required|numeric',
         ]);
         try{
-        $units = $request->unit;    
-        $first_unit_cost = 5;
-		$second_unit_cost = 8;
-		$third_unit_cost = 12;
-		$fourth_unit_cost = 15;
-
-		if($units <= 50) {
-			$total_price = $units * $first_unit_cost;
-		}
-		else if($units > 50 && $units <= 100) {
-			$temp = 50 * $first_unit_cost;
-			$remaining_units = $units - 50;
-			$total_price = $temp + ($remaining_units * $second_unit_cost);
-		}
-		else if($units > 100 && $units <= 250) {
-			$temp = (50 * $first_unit_cost) + (50 * $second_unit_cost);
-			$remaining_units = $units - 100;
-			$total_price = $temp + ($remaining_units * $third_unit_cost);
-		}
-		else {
-			$temp = (50 * $first_unit_cost) + (50 * $second_unit_cost) + (150 * $third_unit_cost);
-			$remaining_units = $units - 250;
-			$total_price = $temp + ($remaining_units * $fourth_unit_cost);
-		}
+            
+            $units = $request->unit;    
+            $slabs = UnitSlab::all();
+            $unit_diff_sum =0;
+            $remaining_units = 0;
+            $total_price = 0;
+            $last_remaining_unit = 0;
+            foreach($slabs as $slab){
+                $diff = $slab->unit_to - $slab->unit_from + 1;
+                $unit_diff_sum += $slab->unit_to - $slab->unit_from + 1;  
+                //echo $unit_diff."  ";
+                $remaining_units =  $units - $unit_diff_sum;
+                if($remaining_units > 0){
+                    $last_remaining_unit = $unit_diff_sum;
+                    $total_price += $diff * $slab->price;
+                // // echo $units * $slab->price ;
+                 }else{
+                    $remaining_units= $units - $last_remaining_unit;
+                    $total_price += $remaining_units * $slab->price;
+                 }
+                
+            }
             $bill = new UserBill;
             $bill->user_id = $request->customer;
             $bill->month = $request->month;
